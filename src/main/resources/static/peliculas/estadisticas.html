@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AyesaFlix — Estadísticas</title>
+	<link rel="icon" type="image/png" href="../favicon.ico">
+	<link href="../css - bootstrap/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+
+		body { background-color: #c9d4e0; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+		.contenido { flex: 1 0 auto; }
+
+		/* ---------- Header (compartido) ---------- */
+		header {
+			background-color: #1a2340; color: white; padding: 0 30px;
+			display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; height: 56px;
+		}
+		.logo { font-size: 1.25rem; font-weight: bold; flex-shrink: 0; }
+		header nav { display: flex; align-items: center; margin-left: 2rem; }
+		nav ul { list-style: none; display: flex; align-items: center; }
+		.menu-principal>li { position: relative; display: flex; align-items: center; }
+		.menu-principal>li>a {
+			text-decoration: none; color: rgba(255, 255, 255, 0.8); padding: 18px 22px;
+			display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 600;
+			box-shadow: inset 0 -2px 0 transparent; transition: color .2s ease, box-shadow .2s ease, background-color .2s ease;
+		}
+		.menu-principal>li>a:hover { color: #fff; box-shadow: inset 0 -2px 0 #eb5feb; background-color: rgba(255, 255, 255, 0.07); }
+		.submenu {
+			display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+			background-color: #1a2340; min-width: 200px; padding: 6px 0; border-radius: 0 0 10px 10px;
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); border-top: 2px solid #eb5feb;
+		}
+		.menu-principal li:hover .submenu { display: block; }
+		.submenu li a {
+			padding: 10px 18px; display: flex; align-items: center; gap: 8px; text-decoration: none;
+			color: rgba(255, 255, 255, 0.75); font-size: .875rem; transition: background-color .15s ease, color .15s ease;
+		}
+		.submenu li a:hover { background-color: #1e2a40; color: #fff; }
+
+		.titulo-pagina { color: #1a2340; font-weight: 700; }
+		.subtitulo-pagina { color: #4a5568; }
+
+		/* ---------- Iconos SVG propios ---------- */
+		.ic { width: 30px; height: 30px; display: inline-block; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+		/* ---------- Cards ---------- */
+		.card-stat {
+			border-radius: 18px; color: #fff; padding: 28px;
+			height: 230px; display: flex; flex-direction: column;
+			box-shadow: 0 12px 28px rgba(12, 18, 35, 0.18);
+			transition: transform .25s ease, box-shadow .25s ease;
+			position: relative; overflow: hidden;
+		}
+		.card-stat:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(12, 18, 35, 0.3); }
+
+		/* círculo decorativo de fondo (sutil, no es un gráfico) */
+		.card-stat::after {
+			content: ''; position: absolute; right: -40px; top: -40px;
+			width: 150px; height: 150px; border-radius: 50%;
+			background: rgba(255, 255, 255, 0.12);
+		}
+
+		.card-stat .icono {
+			width: 56px; height: 56px; border-radius: 15px;
+			background: rgba(255, 255, 255, 0.18);
+			display: flex; align-items: center; justify-content: center;
+			margin-bottom: 18px; position: relative; z-index: 1;
+		}
+		.card-stat .valor { font-size: 3rem; font-weight: 800; line-height: 1; letter-spacing: -1px; position: relative; z-index: 1; font-variant-numeric: tabular-nums; }
+		.card-stat .valor.texto { font-size: 2rem; }
+		.card-stat .valor small { font-size: 1.1rem; font-weight: 600; opacity: .85; }
+		.card-stat .sub { font-size: .85rem; opacity: .85; margin-top: 6px; position: relative; z-index: 1; }
+		.card-stat .etiqueta { font-size: 1rem; font-weight: 600; opacity: .92; margin-top: auto; padding-top: 16px; position: relative; z-index: 1; }
+
+		/* Colores (cada card distinto) */
+		.c-magenta { background: linear-gradient(135deg, #eb5feb, #a855f7); }
+		.c-azul    { background: linear-gradient(135deg, #4dabf7, #1d4ed8); }
+		.c-ambar   { background: linear-gradient(135deg, #f59e0b, #f5576c); }
+		.c-rosa    { background: linear-gradient(135deg, #f5576c, #f093fb); }
+		.c-esmeralda { background: linear-gradient(135deg, #10b981, #0ea5e9); }
+		.c-rojo    { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+
+		#estado-error { display: none; text-align: center; color: #b91c1c; padding: 80px 20px; }
+
+		footer { background-color: #1a2340; color: #e2e8f0; text-align: center; padding: 14px; font-size: .85rem; }
+
+		@media (prefers-reduced-motion: reduce) {
+			.card-stat:hover { transform: none; }
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- Sprite de iconos SVG propios -->
+	<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+		<defs>
+			<symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7.5 4v16M16.5 4v16M3 9h4.5M3 14h4.5M16.5 9H21M16.5 14H21"/></symbol>
+			<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2v5l3.2 1.9"/></symbol>
+			<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.2l1.7 5.4 5.4 1.7-5.4 1.7L12 17.4l-1.7-5.4L4.9 10.3l5.4-1.7z"/></symbol>
+			<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 3.8h10a1 1 0 0 1 1 1v15.4l-6-3.4-6 3.4V4.8a1 1 0 0 1 1-1z"/></symbol>
+			<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19.2 8.8a1.8 1.8 0 0 0 0-2.6l-1.4-1.4a1.8 1.8 0 0 0-2.6 0L4 16z"/><path d="M13.6 6.6l3.8 3.8"/></symbol>
+				<symbol id="i-clock-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 1 2.6 6.1"/><path d="M6.1 18.1H3.2v2.9"/><path d="M12 7.2v5l3.2 1.9"/></symbol>
+				<symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.3l-1.5-1.36C5.1 14.06 2.4 11.5 2.4 8.4 2.4 6 4.3 4.1 6.7 4.1c1.6 0 3.2.84 4.2 2.18C11.9 4.94 13.5 4.1 15.1 4.1c2.4 0 4.3 1.9 4.3 4.3 0 3.1-2.7 5.66-8.1 10.54L12 20.3z"/></symbol>
+		</defs>
+	</svg>
+
+	<div id="header-container"></div>
+
+	<div class="container my-5 contenido" style="padding-bottom: 30px;">
+		<h2 class="titulo-pagina mb-1"><i class="bi bi-bar-chart-line-fill me-2"></i>Mis Estadísticas</h2>
+		<p class="subtitulo-pagina mb-4">Tu recopilatorio de actividad en AyesaFlix.</p>
+
+		<div id="estado-error">
+			<i class="bi bi-exclamation-triangle fs-1"></i>
+			<p class="mt-2">No se pudieron cargar las estadísticas. ¿Está arrancado el backend?</p>
+		</div>
+
+		<div id="cards" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+			<div class="col">
+				<div class="card-stat c-magenta">
+					<div class="icono"><svg class="ic"><use href="#i-film"/></svg></div>
+					<div class="valor" id="v-registradas">0</div>
+					<div class="etiqueta">Películas registradas</div>
+				</div>
+			</div>
+
+			<div class="col">
+				<div class="card-stat c-azul">
+					<div class="icono"><svg class="ic"><use href="#i-clock"/></svg></div>
+					<div class="valor"><span id="v-dias">0</span> <small>días</small></div>
+					<div class="sub" id="v-horas">—</div>
+					<div class="etiqueta">Tiempo total visto</div>
+				</div>
+			</div>
+
+			<div class="col">
+				<div class="card-stat c-ambar">
+					<div class="icono"><svg class="ic"><use href="#i-sparkle"/></svg></div>
+					<div class="valor texto" id="v-genero">—</div>
+					<div class="etiqueta">Género favorito</div>
+				</div>
+			</div>
+
+			<div class="col">
+				<div class="card-stat c-rosa">
+					<div class="icono"><svg class="ic"><use href="#i-clock-history"/></svg></div>
+					<div class="valor" id="v-pendientes">0</div>
+					<div class="etiqueta">Pendientes en watchlist</div>
+				</div>
+			</div>
+
+			<div class="col">
+				<div class="card-stat c-esmeralda">
+					<div class="icono"><svg class="ic"><use href="#i-pencil"/></svg></div>
+					<div class="valor" id="v-resenas">0</div>
+					<div class="etiqueta">Reseñas escritas</div>
+				</div>
+			</div>
+
+			<div class="col">
+				<div class="card-stat c-rojo">
+					<div class="icono"><svg class="ic"><use href="#i-heart"/></svg></div>
+					<div class="valor" id="v-favoritas">0</div>
+					<div class="etiqueta">Películas favoritas</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<footer><strong>AyesaFlix 2026 &copy; Todos los derechos reservados</strong></footer>
+
+	<script>
+		const API = 'http://localhost:8080/api';
+		const REDUCIR = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		// Count-up discreto para los valores numéricos
+		function animarContador(el, valor, decimales = 0) {
+			const destino = Number(valor) || 0;
+			if (REDUCIR) { el.textContent = destino.toFixed(decimales); return; }
+			const dur = 800; let ini = null;
+			function paso(ts) {
+				if (ini === null) ini = ts;
+				const p = Math.min((ts - ini) / dur, 1);
+				const e = 1 - Math.pow(1 - p, 3);
+				el.textContent = (destino * e).toFixed(decimales);
+				if (p < 1) requestAnimationFrame(paso);
+			}
+			requestAnimationFrame(paso);
+		}
+
+		async function cargar() {
+			try {
+				const res = await fetch(`${API}/estadisticas`);
+				if (!res.ok) throw new Error('HTTP ' + res.status);
+				const d = await res.json();
+
+				animarContador(document.getElementById('v-registradas'), d.totalRegistradas);
+
+				const min = Number(d.tiempoTotalMinutos) || 0;
+				animarContador(document.getElementById('v-dias'), +(min / 60 / 24).toFixed(1), 1);
+				document.getElementById('v-horas').textContent = `${Math.round(min / 60)} h · ${min} min`;
+
+				document.getElementById('v-genero').textContent = d.generoFavorito || 'Ninguno';
+
+				animarContador(document.getElementById('v-pendientes'), d.watchlistPendientes);
+				animarContador(document.getElementById('v-resenas'), d.totalResenas);
+				animarContador(document.getElementById('v-favoritas'), d.totalFavoritas);
+			} catch (err) {
+				console.error('Error al cargar estadísticas:', err);
+				document.getElementById('cards').style.display = 'none';
+				document.getElementById('estado-error').style.display = 'block';
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', cargar);
+
+		fetch('/peliculas/layout.html')
+			.then(r => r.text())
+			.then(html => { document.getElementById('header-container').innerHTML = html; })
+			.catch(e => console.error('Error al cargar la cabecera:', e));
+	</script>
+
+</body>
+
+</html>

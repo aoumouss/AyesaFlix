@@ -1,0 +1,308 @@
+{
+  "info": {
+    "name": "AyesaFlix API",
+    "_postman_id": "ayesaflix-api-collection",
+    "description": "API REST de **AyesaFlix**, gestor personal de películas (catálogo, watchlist, favoritas, valoraciones, reseñas y estadísticas).\n\n**Stack:** Spring Boot 2.7 · Spring Data JPA · H2 (en memoria) · Bean Validation.\n\n**Base URL por defecto:** `http://localhost:8080`\n\n**Autenticación:** ninguna (API abierta en entorno local).\n\n**Formato:** JSON (`application/json`), UTF-8.\n\n> Configura la variable de colección `baseUrl` si tu servidor escucha en otro host o puerto.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "peliculaId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "generoId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Películas",
+      "description": "Gestión del catálogo de películas: listado paginado con filtros, ficha individual, alta, edición, borrado y acciones rápidas (favorita, vista, valoración, reseña).",
+      "item": [
+        {
+          "name": "Listar películas (paginado + filtros)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas?buscar=&generoId=&page=0&vista=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas"],
+              "query": [
+                { "key": "buscar", "value": "", "description": "Filtra por título (contiene). Opcional.", "disabled": true },
+                { "key": "generoId", "value": "", "description": "Filtra por id de género. Opcional.", "disabled": true },
+                { "key": "page", "value": "0", "description": "Número de página (0-based). Tamaño fijo: 4 por página." },
+                { "key": "vista", "value": "true", "description": "true = vistas, false = pendientes (watchlist). Por defecto true." }
+              ]
+            },
+            "description": "Devuelve un objeto `Page` de Spring con las películas que cumplen los filtros.\n\nLos filtros `buscar` y `generoId` son combinables. Tamaño de página fijo en **4** elementos.\n\n- `GET /api/peliculas` → todas (vistas) paginadas\n- `GET /api/peliculas?buscar=matrix` → por título\n- `GET /api/peliculas?generoId=2` → por género\n- `GET /api/peliculas?buscar=matrix&generoId=2` → por ambos\n- `GET /api/peliculas?page=1` → segunda página\n- `GET /api/peliculas?vista=false` → watchlist (pendientes)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar favoritas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/favoritas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "favoritas"]
+            },
+            "description": "Devuelve la lista (sin paginar) de películas marcadas como favoritas."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener película por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}"]
+            },
+            "description": "Devuelve la ficha de la película.\n\n**Respuestas:** `200 OK` con el JSON · `404 Not Found` si no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear película",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"The Matrix\",\n  \"duracion\": 136,\n  \"anio\": 1999,\n  \"sinopsis\": \"Un hacker descubre la verdadera naturaleza de su realidad.\",\n  \"actores\": \"Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss\",\n  \"urlPortada\": \"https://example.com/matrix.jpg\",\n  \"urlTrailer\": \"https://www.youtube.com/watch?v=vKQi3bBA1y8\",\n  \"valoracion\": 5,\n  \"favorita\": true,\n  \"vista\": true,\n  \"resenaPersonal\": \"Un clásico imprescindible.\",\n  \"genero\": { \"id\": 1 }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas"]
+            },
+            "description": "Crea una película nueva. El cuerpo se valida con Bean Validation.\n\n**Validaciones:**\n- `titulo`: obligatorio (no vacío).\n- `duracion`: mínimo 1.\n- `anio`: mínimo 1888.\n- `valoracion`: entre 1 y 5.\n- `genero`: obligatorio (debe enviarse `{ \"id\": <existente> }`).\n\n**Respuestas:** `201 Created` con la película (incluye `id`) · `400 Bad Request` si falla la validación."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar película (completa)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"The Matrix Reloaded\",\n  \"duracion\": 138,\n  \"anio\": 2003,\n  \"sinopsis\": \"Neo y los rebeldes luchan contra las máquinas.\",\n  \"actores\": \"Keanu Reeves, Laurence Fishburne\",\n  \"urlPortada\": \"https://example.com/matrix2.jpg\",\n  \"urlTrailer\": \"https://www.youtube.com/watch?v=kE8kGMfXaFU\",\n  \"valoracion\": 4,\n  \"favorita\": true,\n  \"vista\": true,\n  \"resenaPersonal\": \"Buena secuela.\",\n  \"genero\": { \"id\": 1 }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}"]
+            },
+            "description": "Reemplaza **todos** los campos de la película. Envía el JSON completo.\n\n**Respuestas:** `200 OK` con la película actualizada · `404 Not Found` si no existe · `400 Bad Request` si falla la validación."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar valoración (estrellas)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}/valoracion?valoracion=4",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}", "valoracion"],
+              "query": [
+                { "key": "valoracion", "value": "4", "description": "Nueva valoración (1-5). Obligatorio." }
+              ]
+            },
+            "description": "Actualiza únicamente la valoración, sin tocar el resto de campos.\n\n**Respuestas:** `200 OK` con la película · `404 Not Found` si no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar reseña personal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resenaPersonal\": \"Mi opinión actualizada sobre la película.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}/resena",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}", "resena"]
+            },
+            "description": "Actualiza solo la reseña personal. El cuerpo es un objeto con la clave `resenaPersonal`.\n\n**Respuestas:** `200 OK` con la película · `404 Not Found` si no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Alternar favorita (toggle)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}/favorita",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}", "favorita"]
+            },
+            "description": "Alterna el estado de favorita: si era favorita la quita, si no, la añade.\n\n**Respuesta:** `200 OK` con un booleano (`true` = ahora es favorita, `false` = ya no lo es)."
+          },
+          "response": []
+        },
+        {
+          "name": "Alternar vista / pendiente (toggle watchlist)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}/vista",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}", "vista"]
+            },
+            "description": "Alterna entre vista y pendiente (watchlist).\n\n**Respuesta:** `200 OK` con un booleano (`true` = vista, `false` = pendiente)."
+          },
+          "response": []
+        },
+        {
+          "name": "Borrar película",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peliculas/{{peliculaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "peliculas", "{{peliculaId}}"]
+            },
+            "description": "Elimina la película.\n\n**Respuestas:** `204 No Content` si se borró · `404 Not Found` si no existe."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Géneros",
+      "description": "CRUD de géneros cinematográficos. El nombre es único.",
+      "item": [
+        {
+          "name": "Listar géneros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/generos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "generos"]
+            },
+            "description": "Devuelve la lista completa de géneros."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener género por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/generos/{{generoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "generos", "{{generoId}}"]
+            },
+            "description": "**Respuestas:** `200 OK` con el género · `404 Not Found` si no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear género",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ciencia ficción\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/generos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "generos"]
+            },
+            "description": "Crea un género. El campo `nombre` es obligatorio y único.\n\n**Respuestas:** `200 OK` con el género creado (incluye `id`) · `400 Bad Request` si falla la validación."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar género",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sci-Fi\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/generos/{{generoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "generos", "{{generoId}}"]
+            },
+            "description": "Reemplaza el nombre del género.\n\n**Respuestas:** `200 OK` con el género actualizado · `404 Not Found` si no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Borrar género",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/generos/{{generoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "generos", "{{generoId}}"]
+            },
+            "description": "Elimina el género.\n\n**Respuestas:** `204 No Content` si se borró · `404 Not Found` si no existe.\n\n> Nota: borrar un género referenciado por películas puede fallar por la restricción de clave foránea (`id_genero` no nulo)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Estadísticas",
+      "description": "Métricas agregadas del catálogo.",
+      "item": [
+        {
+          "name": "Obtener estadísticas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/estadisticas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "estadisticas"]
+            },
+            "description": "Devuelve un resumen con:\n\n- `totalRegistradas`: número total de películas.\n- `watchlistPendientes`: películas con `vista = false`.\n- `tiempoTotalMinutos`: suma de duración de las películas vistas.\n- `totalResenas`: número de películas con reseña personal.\n- `generoFavorito`: género más frecuente."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="AyesaFlix">
+	<meta name="author" content="Carlos Leon Saavedra, Miguel Castillero Gomez, Abderrazak Oumouss Ait Moussa">
+	<title>AyesaFlix</title>
+	<link rel="icon" type="image/png" href="favicon.ico">
+
+	<link href="css - bootstrap/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body.fondo-personalizado {
+			background-color: #c9d4e0;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+			margin: 0;
+			font-family: sans-serif;
+		}
+
+		header {
+			background-color: #1a2340;
+			color: white;
+			padding: 0 30px;
+			display: flex;
+			align-items: center;
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+			height: 56px;
+		}
+
+		.logo {
+			font-size: 1.25rem;
+			font-weight: bold;
+			flex-shrink: 0;
+		}
+
+		header nav {
+			display: flex;
+			align-items: center;
+			margin-left: 2rem;
+		}
+
+		nav ul {
+			list-style: none;
+			display: flex;
+			align-items: center;
+		}
+
+		.menu-principal>li {
+			position: relative;
+			display: flex;
+			align-items: center;
+		}
+
+		.menu-principal>li>a {
+			text-decoration: none;
+			color: rgba(255, 255, 255, 0.8);
+			padding: 18px 22px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 1.05rem;
+			font-weight: 600;
+			box-shadow: inset 0 -2px 0 transparent;
+			transition: color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+		}
+
+		.menu-principal>li>a:hover {
+			color: #ffffff;
+			box-shadow: inset 0 -2px 0 #eb5feb;
+			background-color: rgba(255, 255, 255, 0.07);
+		}
+
+		.submenu {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			transform: translateX(-50%);
+			background-color: #1a2340;
+			min-width: 200px;
+			padding: 6px 0;
+			border-radius: 0 0 10px 10px;
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+			border-top: 2px solid #eb5feb;
+		}
+
+		.menu-principal li:hover .submenu {
+			display: block;
+		}
+
+		.submenu li a {
+			padding: 10px 18px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			text-decoration: none;
+			color: rgba(255, 255, 255, 0.75);
+			font-size: 0.875rem;
+			transition: background-color 0.15s ease, color 0.15s ease;
+		}
+
+		.submenu li a:hover {
+			background-color: #1e2a40;
+			color: #ffffff;
+		}
+
+		.tarjeta-oscura {
+			background-color: #1e2a40;
+			border-radius: 16px !important;
+			position: relative;
+			height: 175px;
+		}
+
+		.tarjeta-oscura .card-body {
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			overflow: hidden;
+		}
+
+		.tarjeta-oscura .card-title {
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			padding-right: 28px;
+			line-height: 1.25;
+			margin-bottom: 2px !important;
+		}
+
+		.contenedor-poster {
+			height: 420px;
+			overflow: hidden;
+			border-radius: 16px;
+		}
+
+		.carrusel-wrapper {
+			position: relative;
+			padding: 0 54px;
+		}
+
+		.carrusel-viewport {
+			overflow-x: scroll;
+			scroll-behavior: smooth;
+			scrollbar-width: none;
+			-ms-overflow-style: none;
+		}
+
+		.carrusel-viewport::-webkit-scrollbar {
+			display: none;
+		}
+
+		.carrusel-track {
+			display: flex;
+			gap: 2rem;
+		}
+
+		.carrusel-item {
+			flex-shrink: 0;
+			text-align: center;
+		}
+
+		.carrusel-btn {
+			position: absolute;
+			top: 42%;
+			transform: translateY(-50%);
+			z-index: 10;
+			background-color: rgba(26, 35, 64, 0.92);
+			border: 2px solid rgba(255, 255, 255, 0.15);
+			color: white;
+			border-radius: 50%;
+			width: 46px;
+			height: 46px;
+			font-size: 1.1rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+		}
+
+		.carrusel-btn:hover:not(:disabled) {
+			background-color: #eb5feb;
+			border-color: #eb5feb;
+			transform: translateY(-50%) scale(1.08);
+		}
+
+		.carrusel-btn:disabled {
+			opacity: 0.22;
+			cursor: default;
+		}
+
+		.carrusel-btn-izq {
+			left: 0;
+		}
+
+		.carrusel-btn-der {
+			right: 0;
+		}
+
+		.poster-redondeado {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.text-rosa {
+			color: #ddfd2a !important;
+		}
+
+		.contenedor-estrellas {
+			background-color: transparent;
+			padding: 4px 8px;
+			border-radius: 20px;
+			display: inline-flex;
+			gap: 2px;
+		}
+
+		.contenedor-estrellas i {
+			transition: color 0.2s ease;
+		}
+
+		.boton-marcador {
+			position: absolute;
+			top: 15px;
+			right: 15px;
+			background: none;
+			border: none;
+			padding: 0;
+			cursor: pointer;
+			font-size: 1.4rem;
+			z-index: 10;
+			transition: transform 0.2s ease;
+		}
+
+		.boton-marcador:hover {
+			transform: scale(1.15);
+		}
+
+		.marcador-activo {
+			color: #0D6EFD !important;
+		}
+
+		.marcador-inactivo {
+			color: #ffffff;
+			opacity: 0.6;
+		}
+
+		.contenedor-busqueda {
+			background-color: rgba(18, 24, 41, 0.45);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 14px !important;
+			backdrop-filter: blur(4px);
+		}
+
+		.contenedor-busqueda .form-control:focus {
+			box-shadow: none;
+			color: #ffffff;
+		}
+
+		.placeholder-personalizado::placeholder {
+			color: rgba(255, 255, 255, 0.5) !important;
+			opacity: 1;
+		}
+
+		.contenedor-busqueda .input-group-text,
+		.contenedor-busqueda .form-control {
+			border-radius: 14px !important;
+		}
+
+		.footer-personalizado {
+			background-color: #1a2340;
+			border-top: 1px solid rgba(255, 255, 255, 0.08);
+			margin-top: auto;
+		}
+
+		.texto-footer {
+			color: #e2e8f0;
+			font-weight: 500;
+		}
+
+		.links-footer,
+		.links-footer a {
+			color: #e2e8f0;
+			transition: color 0.2s ease;
+		}
+
+		.links-footer a:hover {
+			color: #ffffff;
+		}
+
+		.popup-contenido {
+			background-color: #1e2a40 !important;
+			border-radius: 16px !important;
+			position: relative;
+		}
+
+		/* Reseña personal: modo lectura con botón-lápiz "Editar" que aparece al hover */
+		.resena-lectura {
+			position: relative;
+			background: #0e1729;
+			border: 1px solid #2e3f5c;
+			border-radius: 10px;
+			padding: 14px 16px;
+			color: #e2e8f0;
+			transition: border-color .2s ease;
+		}
+
+		.resena-lectura:hover { border-color: #3b4d6b; }
+
+		.resena-lectura #resena-texto {
+			white-space: pre-wrap;
+			padding-right: 36px;
+		}
+
+		.btn-editar-resena {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			width: 30px;
+			height: 30px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(235, 95, 235, 0.15);
+			color: #eb5feb;
+			border: 1px solid rgba(235, 95, 235, 0.4);
+			border-radius: 8px;
+			cursor: pointer;
+			opacity: 0;
+			transform: scale(.85);
+			transition: opacity .18s ease, transform .18s ease, background .18s ease, color .18s ease;
+		}
+
+		.btn-editar-resena:hover { background: rgba(235, 95, 235, 0.32); color: #fff; }
+		.resena-lectura:hover .btn-editar-resena { opacity: 1; transform: scale(1); }
+
+		.btn-cerrar-popup {
+			position: absolute;
+			top: 15px;
+			right: 15px;
+			background-color: #f43f5e;
+			color: white;
+			border: none;
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			font-weight: bold;
+			font-size: 0.9rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+			z-index: 1051;
+			transition: transform 0.2s ease, background-color 0.2s ease;
+		}
+
+		.btn-cerrar-popup:hover {
+			transform: scale(1.1);
+			background-color: #e11d48;
+		}
+
+		.popup-sinopsis {
+			font-size: 0.95rem;
+			line-height: 1.5;
+			opacity: 0.9;
+		}
+
+		.opacity-20 {
+			opacity: 0.2;
+		}
+
+		.filtros-genero-wrapper {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			justify-content: center;
+			margin-top: 18px;
+		}
+
+		.filtro-genero-btn {
+			background-color: rgba(18, 24, 41, 0.45);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: rgba(255, 255, 255, 0.75);
+			border-radius: 50px;
+			padding: 5px 20px;
+			font-size: 0.875rem;
+			font-weight: 600;
+			cursor: pointer;
+			backdrop-filter: blur(4px);
+			transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+		}
+
+		.filtro-genero-btn:hover {
+			background-color: rgba(235, 95, 235, 0.18);
+			border-color: #eb5feb;
+			color: #ffffff;
+		}
+
+		.filtro-genero-btn.activo {
+			background-color: #eb5feb;
+			border-color: #eb5feb;
+			color: #ffffff;
+			box-shadow: 0 0 10px rgba(235, 95, 235, 0.4);
+		}
+	</style>
+</head>
+
+<body class="fondo-personalizado">
+
+
+
+	<div id="header-container"></div>
+
+
+	<div class="container my-5">
+		<div class="mx-auto" style="max-width: 500px;">
+			<div class="input-group contenedor-busqueda shadow-sm">
+				<span class="input-group-text bg-transparent border-0 text-white-50 ps-3">
+					<i class="bi bi-search fs-5"></i>
+				</span>
+				<input type="text" id="input-busqueda"
+					class="form-control bg-transparent border-0 text-white placeholder-personalizado py-2"
+					placeholder="Buscar películas">
+			</div>
+		</div>
+
+		<div class="filtros-genero-wrapper" id="genero-filtros"></div>
+
+		<br><br>
+
+		<div class="carrusel-wrapper">
+			<button id="btn-prev" class="carrusel-btn carrusel-btn-izq" disabled>
+				<i class="bi bi-chevron-left"></i>
+			</button>
+
+			<div class="carrusel-viewport">
+				<div id="carrusel-track" class="carrusel-track"></div>
+			</div>
+
+			<button id="btn-next" class="carrusel-btn carrusel-btn-der">
+				<i class="bi bi-chevron-right"></i>
+			</button>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modalDetallesPelicula" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content popup-contenido border-0 shadow-lg text-white">
+				<button type="button" class="btn-cerrar-popup" data-bs-dismiss="modal" aria-label="Close">X</button>
+				<div class="modal-body p-4">
+					<div class="row">
+						<div class="col-md-5 mb-3 mb-md-0">
+							<img id="modal-poster" src="https://picsum.photos/300/400" class="img-fluid rounded w-100"
+								alt="Póster">
+						</div>
+						<div class="col-md-7">
+							<h2 id="modal-titulo" class="fw-bold mb-1">Título de la película</h2>
+							<p id="modal-meta" class="small text-white-50 mb-3">—</p>
+							<p id="modal-sinopsis" class="popup-sinopsis mb-4">Descripción...</p>
+							<div id="modal-estrellas" class="mb-3 text-warning"></div>
+							<div class="mt-4">
+								<label class="form-label text-white-50 small">Mi Reseña Personal</label>
+
+								<!-- MODO LECTURA: se muestra cuando ya hay reseña; el botón Editar aparece al pasar el ratón -->
+								<div id="resena-lectura" class="resena-lectura" style="display:none;">
+									<p id="resena-texto" class="mb-0"></p>
+									<button type="button" class="btn-editar-resena" onclick="activarEdicionResena()"
+										title="Editar reseña" aria-label="Editar reseña">
+										<i class="bi bi-pencil"></i>
+									</button>
+								</div>
+
+								<!-- MODO EDICIÓN: textarea + guardar -->
+								<div id="resena-edicion">
+									<textarea id="modal-resena" class="form-control bg-dark text-white border-secondary"
+										rows="3" placeholder="Escribe aquí tu opinión sobre la película..."></textarea>
+									<button id="btn-guardar-resena" class="btn btn-primary btn-sm mt-2 w-100"
+										onclick="guardarResenaActiva()">
+										<i class="bi bi-save me-1"></i> Guardar Opinión
+									</button>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+					<hr class="border-white opacity-20 my-4">
+					<div class="row">
+						<div class="col-12">
+							<h6 class="text-uppercase fw-bold text-white-50 small mb-2">Reparto</h6>
+							<p id="modal-actores" class="mb-0 small text-white">—</p>
+						</div>
+					</div>
+
+					<div id="modal-trailer-section" style="display:none;">
+						<hr class="border-white opacity-20 my-4">
+						<h6 class="text-uppercase fw-bold text-white-50 small mb-3">
+							<i class="bi bi-play-circle-fill text-danger me-1"></i>Trailer
+						</h6>
+						<div class="ratio ratio-16x9">
+							<iframe id="modal-trailer-iframe" src="" title="Trailer oficial" frameborder="0"
+								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+								allowfullscreen style="border-radius: 10px;">
+							</iframe>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer class="footer-personalizado fixed-bottom py-2 text-center">
+		<div class="container">
+			<p class="mb-1 small texto-footer">
+				<strong>AyesaFlix 2026 &copy; Todos los derechos reservados</strong>
+			</p>
+			<p class="mb-0 small links-footer">
+				<a href="#" class="text-decoration-none"><strong>Contacto</strong></a> |
+				<a href="#" class="text-decoration-none"><strong>Términos</strong></a> |
+				<a href="#" class="text-decoration-none"><strong>Privacidad</strong></a>
+			</p>
+		</div>
+	</footer>
+
+	<script src="js - bootstrap/bootstrap.bundle.min.js"></script>
+
+	<script>
+		const API = 'http://localhost:8080/api';
+		let dbPeliculas = [];
+		let todasLasPeliculasRespando = [];
+		let offsetCarrusel = 0;
+		const ITEMS_POR_VISTA = 4;
+		let generoSeleccionado = null;
+		let peliculaActual = null;
+
+		function escapeHtml(text) {
+			const div = document.createElement('div');
+			div.appendChild(document.createTextNode(text ?? ''));
+			return div.innerHTML;
+		}
+
+		function inicializarEventos() {
+
+			document.querySelectorAll('.contenedor-estrellas').forEach(contenedor => {
+				const estrellas = contenedor.querySelectorAll('i');
+				let valorGuardado = parseInt(contenedor.getAttribute('data-valoracion')) || 0;
+
+				estrellas.forEach(estrella => {
+					estrella.addEventListener('mouseover', () => {
+						rellenarEstrellas(estrellas, parseInt(estrella.getAttribute('data-value')));
+					});
+					estrella.addEventListener('mouseleave', () => {
+						rellenarEstrellas(estrellas, valorGuardado);
+					});
+					estrella.addEventListener('click', async (e) => {
+						e.stopPropagation();
+						valorGuardado = parseInt(estrella.getAttribute('data-value'));
+						rellenarEstrellas(estrellas, valorGuardado);
+						contenedor.setAttribute('data-valoracion', valorGuardado);
+						const idPelicula = contenedor.getAttribute('data-pelicula');
+						await fetch(`${API}/peliculas/${idPelicula}/valoracion?valoracion=${valorGuardado}`, {
+							method: 'PATCH'
+						});
+					});
+				});
+			});
+
+			function rellenarEstrellas(estrellas, limite) {
+				estrellas.forEach(est => {
+					const v = parseInt(est.getAttribute('data-value'));
+					if (v <= limite) {
+						est.classList.remove('bi-star');
+						est.classList.add('bi-star-fill');
+					} else {
+						est.classList.remove('bi-star-fill');
+						est.classList.add('bi-star');
+					}
+				});
+			}
+
+			document.querySelectorAll('.boton-marcador').forEach(boton => {
+				boton.addEventListener('click', async (e) => {
+					e.stopPropagation();
+					const icono = boton.querySelector('i');
+					const esMarcado = boton.getAttribute('data-marcado') === 'true';
+					const idPelicula = boton.getAttribute('data-id');
+
+					if (!esMarcado) {
+						icono.classList.replace('bi-bookmark', 'bi-bookmark-fill');
+						boton.classList.replace('marcador-inactivo', 'marcador-activo');
+						boton.setAttribute('data-marcado', 'true');
+					} else {
+						icono.classList.replace('bi-bookmark-fill', 'bi-bookmark');
+						boton.classList.replace('marcador-activo', 'marcador-inactivo');
+						boton.setAttribute('data-marcado', 'false');
+					}
+
+					await fetch(`${API}/peliculas/${idPelicula}/favorita`, {method: 'POST'});
+				});
+			});
+		}
+
+		document.getElementById('btn-prev').addEventListener('click', () => {
+			offsetCarrusel = Math.max(0, offsetCarrusel - ITEMS_POR_VISTA);
+			actualizarCarrusel();
+		});
+
+		document.getElementById('btn-next').addEventListener('click', () => {
+			offsetCarrusel = Math.min(dbPeliculas.length - ITEMS_POR_VISTA, offsetCarrusel + ITEMS_POR_VISTA);
+			actualizarCarrusel();
+		});
+
+		function generarTarjetaPelicula(p) {
+			const val = p.valoracion ?? 0;
+			const estrellas = [1, 2, 3, 4, 5].map(n =>
+				`<i class="bi ${n <= val ? 'bi-star-fill' : 'bi-star'} text-rosa" data-value="${n}"></i>`
+			).join('');
+
+			return `
+                                <div class="carrusel-item">
+                                        <div class="contenedor-poster mb-3 shadow" style="cursor: pointer;"
+                                                data-bs-toggle="modal" data-bs-target="#modalDetallesPelicula"
+                                                onclick="mostrarDetalle(${p.id})">
+                                                <img src="${escapeHtml(p.urlPortada ?? 'https://picsum.photos/300/400')}"
+                                                        class="img-fluid poster-redondeado shadow" alt="${escapeHtml(p.titulo)}">
+                                        </div>
+                                        <div class="card tarjeta-oscura border-0 shadow-sm text-white my-3 p-2">
+                                                <div class="card-body p-2">
+                                                        <div class="text-start">
+                                                                <button class="boton-marcador ${p.favorita ? 'marcador-activo' : 'marcador-inactivo'}"
+                                                                        data-marcado="${p.favorita}" data-id="${p.id}">
+                                                                        <i class="bi ${p.favorita ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>
+                                                                </button>
+                                                                <h5 class="card-title fw-bold mb-1">${escapeHtml(p.titulo)}</h5>
+                                                                <p class="text-white small mb-1">${p.anio ?? '—'}</p>
+                                                                <span class="badge bg-primary px-3 py-2 fs-6">${escapeHtml(p.genero?.nombre ?? 'Sin género')}</span>
+                                                        </div>
+                                                        <div class="contenedor-estrellas" data-pelicula="${p.id}" data-valoracion="${val}" style="align-self:flex-end;">
+                                                                ${estrellas}
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>`;
+		}
+
+		const GAP_PX = 32;
+
+		function anchoItem() {
+			const vp = document.querySelector('.carrusel-viewport');
+			return Math.floor((vp.clientWidth - (ITEMS_POR_VISTA - 1) * GAP_PX) / ITEMS_POR_VISTA);
+		}
+
+		function ajustarAnchoItems() {
+			const w = anchoItem();
+			document.querySelectorAll('.carrusel-item').forEach(item => {
+				item.style.width = w + 'px';
+			});
+		}
+
+		function actualizarCarrusel() {
+			const vp = document.querySelector('.carrusel-viewport');
+			const w = anchoItem();
+			vp.scrollTo({left: offsetCarrusel * (w + GAP_PX), behavior: 'smooth'});
+			document.getElementById('btn-prev').disabled = offsetCarrusel === 0;
+			document.getElementById('btn-next').disabled = offsetCarrusel + ITEMS_POR_VISTA >= dbPeliculas.length;
+		}
+
+		function renderizarCarrusel() {
+			const track = document.getElementById('carrusel-track');
+			track.innerHTML = dbPeliculas.map(p => generarTarjetaPelicula(p)).join('');
+			ajustarAnchoItems();
+			inicializarEventos();
+			offsetCarrusel = 0;
+			actualizarCarrusel();
+		}
+
+		window.addEventListener('resize', () => {ajustarAnchoItems(); actualizarCarrusel();});
+
+		async function cargarPeliculas() {
+			const res0 = await fetch(`${API}/peliculas`);
+			if (!res0.ok) throw new Error(`HTTP ${res0.status}`);
+			const data0 = await res0.json();
+
+			let todas = [...(data0.content ?? data0)];
+			const totalPages = data0.totalPages ?? 1;
+
+			if (totalPages > 1) {
+				const peticiones = [];
+				for (let p = 1; p < totalPages; p++) {
+					peticiones.push(fetch(`${API}/peliculas?page=${p}`).then(r => r.json()));
+				}
+				const paginas = await Promise.all(peticiones);
+				paginas.forEach(d => {todas = todas.concat(d.content ?? []);});
+			}
+
+			dbPeliculas = todas;
+			todasLasPeliculasRespando = [...todas];
+			renderizarCarrusel();
+		}
+
+		async function cargarFiltrosGeneros() {
+			const res = await fetch(`${API}/generos`);
+			if (!res.ok) return;
+			const generos = await res.json();
+
+			const contenedor = document.getElementById('genero-filtros');
+			contenedor.innerHTML = '';
+
+			// Píldora "Todos" activa por defecto
+			const btnTodos = document.createElement('button');
+			btnTodos.className = 'filtro-genero-btn activo';
+			btnTodos.textContent = 'Todos';
+			btnTodos.addEventListener('click', () => filtrarPorGenero(null, btnTodos));
+			contenedor.appendChild(btnTodos);
+
+			// Una píldora por cada género
+			generos.forEach(g => {
+				const btn = document.createElement('button');
+				btn.className = 'filtro-genero-btn';
+				btn.textContent = g.nombre;
+				btn.addEventListener('click', () => filtrarPorGenero(g.id, btn));
+				contenedor.appendChild(btn);
+			});
+		}
+
+
+		function filtrarPorGenero(generoId, btnPulsado) {
+			// Quitar clase activo de todos los botones y ponerla solo al pulsado
+			document.querySelectorAll('#genero-filtros .filtro-genero-btn').forEach(b => b.classList.remove('activo'));
+			btnPulsado.classList.add('activo');
+
+			generoSeleccionado = generoId;
+			filtrarPeliculas();
+		}
+
+		function filtrarPeliculas() {
+			const textoBusqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+
+			dbPeliculas = todasLasPeliculasRespando.filter(p => {
+				const porTitulo = textoBusqueda === '' || (p.titulo ?? '').toLowerCase().includes(textoBusqueda);
+				const porGenero = generoSeleccionado === null || p.genero?.id === generoSeleccionado;
+				return porTitulo && porGenero;
+			});
+
+			renderizarCarrusel();
+		}
+
+		async function mostrarDetalle(id) {
+
+			const res = await fetch(`${API}/peliculas/${id}`);
+			if (!res.ok) return;
+			const p = await res.json();
+			peliculaActual = p;
+
+			document.getElementById('modal-poster').src = p.urlPortada ?? 'https://picsum.photos/300/400';
+			document.getElementById('modal-titulo').textContent = p.titulo ?? '—';
+			document.getElementById('modal-meta').textContent =
+				`${p.anio ?? '—'} • ${p.genero?.nombre ?? '—'} • ${p.duracion ? p.duracion + ' min' : '—'}`;
+			document.getElementById('modal-sinopsis').textContent = p.sinopsis ?? '—';
+			document.getElementById('modal-actores').textContent = p.actores ?? '—';
+			pintarResena(p.resenaPersonal);
+
+			const val = p.valoracion ?? 0;
+			document.getElementById('modal-estrellas').innerHTML =
+				[1, 2, 3, 4, 5].map(n =>
+					`<i class="bi ${n <= val ? 'bi-star-fill' : 'bi-star'}"></i>`
+				).join('');
+
+			const trailerSection = document.getElementById('modal-trailer-section');
+			const trailerIframe = document.getElementById('modal-trailer-iframe');
+			if (p.urlTrailer) {
+				trailerIframe.src = p.urlTrailer;
+				trailerSection.style.display = 'block';
+			} else {
+				trailerIframe.src = '';
+				trailerSection.style.display = 'none';
+			}
+		}
+
+		document.getElementById('modalDetallesPelicula').addEventListener('hidden.bs.modal', () => {
+			document.getElementById('modal-trailer-iframe').src = '';
+		});
+
+		//Aqui es de donde funciona el buscador dinamico. Este primero dice el timepo que tarda en buscar, para menos tiempo, bajar el 350
+		document.getElementById('input-busqueda').addEventListener('input', debounce(filtrarPeliculasDinamico, 350));
+
+		//Funcion que permite buscar dinamicamente
+		function debounce(func, delay) {
+			let timer;
+			return function (...args) {
+				clearTimeout(timer);
+				timer = setTimeout(() => func.apply(this, args), delay);
+			};
+		}
+
+		//Buscador dinamico: filtra en memoria combinando titulo + genero seleccionado.
+		//No hace fetch (asi respeta la pildora de genero activa y no se limita a la pagina 0).
+		function filtrarPeliculasDinamico() {
+			filtrarPeliculas();
+		}
+
+		cargarPeliculas();
+		cargarFiltrosGeneros();
+
+
+		fetch('/peliculas/layout.html') // <--- Con la barra / al principio
+			.then(response => response.text())
+			.then(data => {
+				document.getElementById('header-container').innerHTML = data;
+			})
+			.catch(error => console.error('Error al cargar la cabecera:', error));
+
+		// Muestra la reseña en modo lectura (si hay texto) o en modo edición (si está vacía)
+		function pintarResena(texto) {
+			const lectura = document.getElementById('resena-lectura');
+			const edicion = document.getElementById('resena-edicion');
+			document.getElementById('modal-resena').value = texto ?? '';
+			if (texto && texto.trim()) {
+				document.getElementById('resena-texto').textContent = texto;
+				lectura.style.display = 'block';
+				edicion.style.display = 'none';
+			} else {
+				lectura.style.display = 'none';
+				edicion.style.display = 'block';
+			}
+		}
+
+		// Pasa de modo lectura a edición (al pulsar "Editar reseña")
+		function activarEdicionResena() {
+			document.getElementById('resena-lectura').style.display = 'none';
+			document.getElementById('resena-edicion').style.display = 'block';
+			document.getElementById('modal-resena').focus();
+		}
+
+		async function guardarResenaActiva() {
+			const textoResena = document.getElementById('modal-resena').value.trim();
+
+			const res = await fetch(`${API}/peliculas/${peliculaActual.id}/resena`, {
+				method: 'PATCH',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({resenaPersonal: textoResena || null})
+			});
+
+			if (res.ok) {
+				peliculaActual.resenaPersonal = textoResena || null;
+				pintarResena(textoResena);   // vuelve a modo lectura si hay texto (confirmación visual)
+			} else {
+				alert('Error al guardar la reseña.');
+			}
+		}
+	</script>
+</body>
+
+</html>

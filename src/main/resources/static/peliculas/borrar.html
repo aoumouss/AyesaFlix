@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AyesaFlix — Borrar Película</title>
+	<link rel="icon" type="image/png" href="../favicon.ico">
+	<link href="../css - bootstrap/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			background-color: #c9d4e0;
+			font-family: sans-serif;
+			min-height: 100vh;
+		}
+
+		header {
+			background-color: #1a2340; color: white;
+			padding: 0 30px; display: flex; align-items: center;
+			position: sticky; top: 0; z-index: 1000; height: 56px;
+		}
+
+		.logo { font-size: 1.25rem; font-weight: bold; flex-shrink: 0; }
+
+		header nav {
+			display: flex; align-items: center; margin-left: 2rem;
+		}
+
+		nav ul { list-style: none; display: flex; align-items: center; }
+
+		.menu-principal>li { position: relative; display: flex; align-items: center; }
+
+		.menu-principal>li>a {
+			text-decoration: none; color: rgba(255,255,255,0.8);
+			padding: 18px 22px; display: flex; align-items: center;
+			gap: 8px; font-size: 1.05rem; font-weight: 600;
+			box-shadow: inset 0 -2px 0 transparent;
+			transition: color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+		}
+
+		.menu-principal>li>a:hover {
+			color: #ffffff;
+			box-shadow: inset 0 -2px 0 #eb5feb;
+			background-color: rgba(255,255,255,0.07);
+		}
+
+		.submenu {
+			display: none; position: absolute; top: 100%; left: 50%;
+			transform: translateX(-50%);
+			background-color: #1a2340; min-width: 200px; padding: 6px 0;
+			border-radius: 0 0 10px 10px;
+			box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+			border-top: 2px solid #eb5feb;
+		}
+
+		.menu-principal li:hover .submenu { display: block; }
+
+		.submenu li a {
+			padding: 10px 18px; display: flex; align-items: center; gap: 8px;
+			text-decoration: none; color: rgba(255,255,255,0.75); font-size: 0.875rem;
+			transition: background-color 0.15s ease, color 0.15s ease;
+		}
+
+		.submenu li a:hover { background-color: #1e2a40; color: #ffffff; }
+
+		.formulario-card {
+			background-color: #1e2a40;
+			border-radius: 16px;
+			padding: 2rem;
+			max-width: 550px;
+			margin: 3rem auto;
+			color: white;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+		}
+
+		.formulario-card h2 {
+			margin-bottom: 1.5rem;
+			font-size: 1.5rem;
+		}
+
+		.form-label {
+			color: #adb5bd;
+			font-size: 0.9rem;
+			margin-bottom: 4px;
+		}
+
+		.form-select {
+			background-color: #1e2a40;
+			border: 1px solid #2e3f5c;
+			color: white;
+			border-radius: 10px;
+		}
+
+		.form-select:focus {
+			background-color: #1e2a40;
+			border-color: #0d6efd;
+			color: white;
+			box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+		}
+
+		.form-select option {
+			background-color: #1e2a40;
+		}
+
+		#panel-confirmacion {
+			display: none;
+		}
+
+		.lista-sugerencias {
+			display: none;
+			position: absolute;
+			top: 100%; left: 0; right: 0;
+			z-index: 999;
+			background-color: #1e2a40;
+			border: 1px solid #2e3f5c;
+			border-radius: 0 0 10px 10px;
+			max-height: 220px;
+			overflow-y: auto;
+			list-style: none;
+			padding: 0; margin: 0;
+		}
+		.lista-sugerencias li {
+			padding: 10px 16px;
+			cursor: pointer;
+			color: rgba(255,255,255,0.85);
+			font-size: 0.9rem;
+		}
+		.lista-sugerencias li:hover {
+			background-color: #2e3f5c;
+			color: #fff;
+		}
+
+		.tarjeta-pelicula {
+			background-color: #1e2a40;
+			border-radius: 12px;
+			padding: 1.2rem;
+			margin: 1.2rem 0;
+			border-left: 4px solid #f43f5e;
+		}
+
+		.tarjeta-pelicula p {
+			margin: 4px 0;
+			font-size: 0.9rem;
+			color: #adb5bd;
+		}
+
+		.tarjeta-pelicula strong {
+			color: white;
+		}
+
+		.btn-borrar {
+			background-color: #f43f5e;
+			color: white;
+			border: none;
+			border-radius: 10px;
+			padding: 10px 30px;
+			font-size: 1rem;
+			cursor: pointer;
+			transition: background-color 0.2s;
+		}
+
+		.btn-borrar:hover {
+			background-color: #e11d48;
+		}
+
+		.btn-cancelar {
+			background-color: transparent;
+			color: #adb5bd;
+			border: 1px solid #2e3f5c;
+			border-radius: 10px;
+			padding: 10px 30px;
+			font-size: 1rem;
+			cursor: pointer;
+			text-decoration: none;
+			transition: all 0.2s;
+		}
+
+		.btn-cancelar:hover {
+			color: white;
+			border-color: white;
+		}
+
+		#mensaje {
+			display: none;
+			border-radius: 10px;
+			padding: 12px 16px;
+			margin-bottom: 1rem;
+			font-size: 0.9rem;
+		}
+
+		.mensaje-ok {
+			background-color: #0f5132;
+			color: #d1e7dd;
+		}
+
+		.mensaje-error {
+			background-color: #842029;
+			color: #f8d7da;
+		}
+
+		footer {
+			background-color: #1a2340;
+			color: #e2e8f0;
+			text-align: center;
+			padding: 10px;
+			font-size: 0.85rem;
+			position: fixed;
+			bottom: 0;
+			width: 100%;
+		}
+	</style>
+</head>
+ 
+<body>
+	<div id="header-container"></div>
+
+	<div class="container">
+		<div class="formulario-card">
+			<h2><i class="bi bi-trash3 me-2"></i>Borrar Película</h2>
+
+			<div id="mensaje"></div>
+
+			<div class="mb-4">
+				<label class="form-label">Busca la película a borrar *</label>
+				<div style="position: relative;">
+					<input type="text" id="input-busqueda-pelicula" class="form-control"
+					       placeholder="Escribe el título de la película..." autocomplete="off">
+					<ul id="lista-resultados" class="lista-sugerencias"></ul>
+				</div>
+			</div>
+
+			<div id="panel-confirmacion">
+				<div class="tarjeta-pelicula">
+					<p><strong id="detalle-titulo"></strong></p>
+					<p>Año: <strong id="detalle-anio"></strong></p>
+					<p>Género: <strong id="detalle-genero"></strong></p>
+					<p>Duración: <strong id="detalle-duracion"></strong></p>
+				</div>
+
+				<p style="color: #f43f5e; font-size: 0.9rem; margin-bottom: 1rem;">
+					<i class="bi bi-exclamation-triangle me-1"></i>
+					Esta acción no se puede deshacer.
+				</p>
+
+				<div class="d-flex gap-3">
+					<button class="btn-borrar" onclick="borrarPelicula()">
+						<i class="bi bi-trash3 me-1"></i> Confirmar borrado
+					</button>
+					<a href="../index.html" class="btn-cancelar">Cancelar</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		<strong>AyesaFlix 2026 &copy; Todos los derechos reservados</strong>
+	</footer>
+
+	<script src="../js - bootstrap/bootstrap.bundle.min.js"></script>
+	<script>
+		const API = 'http://localhost:8080/api';
+		let idSeleccionado = null;
+		let todasLasPeliculas = [];
+
+		async function iniciar() {
+			const res0 = await fetch(`${API}/peliculas`);
+			const data0 = await res0.json();
+
+			let todas = [...(data0.content ?? data0)];
+			const totalPages = data0.totalPages ?? 1;
+			if (totalPages > 1) {
+				const paginas = await Promise.all(
+					Array.from({ length: totalPages - 1 }, (_, i) =>
+						fetch(`${API}/peliculas?page=${i + 1}`).then(r => r.json())
+					)
+				);
+				paginas.forEach(d => { todas = todas.concat(d.content ?? []); });
+			}
+			todasLasPeliculas = todas;
+
+			const input = document.getElementById('input-busqueda-pelicula');
+			const lista = document.getElementById('lista-resultados');
+
+			input.addEventListener('input', () => {
+				const texto = input.value.toLowerCase().trim();
+				lista.innerHTML = '';
+				if (!texto) { lista.style.display = 'none'; return; }
+
+				const coincidencias = todasLasPeliculas.filter(p =>
+					(p.titulo ?? '').toLowerCase().includes(texto)
+				);
+				if (!coincidencias.length) { lista.style.display = 'none'; return; }
+
+				coincidencias.forEach(p => {
+					const li = document.createElement('li');
+					li.textContent = p.titulo;
+					li.addEventListener('click', () => {
+						input.value = p.titulo;
+						lista.style.display = 'none';
+						mostrarConfirmacion(p.id);
+					});
+					lista.appendChild(li);
+				});
+				lista.style.display = 'block';
+			});
+
+			document.addEventListener('click', e => {
+				if (!e.target.closest('#input-busqueda-pelicula') && !e.target.closest('#lista-resultados')) {
+					lista.style.display = 'none';
+				}
+			});
+		}
+
+		async function mostrarConfirmacion(id) {
+			const panel = document.getElementById('panel-confirmacion');
+
+			if (!id) {
+				panel.style.display = 'none';
+				idSeleccionado = null;
+				return;
+			}
+
+			const res = await fetch(`${API}/peliculas/${id}`);
+			const p = await res.json();
+			idSeleccionado = p.id;
+
+			document.getElementById('detalle-titulo').textContent = p.titulo ?? '—';
+			document.getElementById('detalle-anio').textContent = p.anio ?? '—';
+			document.getElementById('detalle-genero').textContent = p.genero?.nombre ?? '—';
+			document.getElementById('detalle-duracion').textContent = p.duracion ? p.duracion + ' min' : '—';
+
+			panel.style.display = 'block';
+		}
+
+		function mostrarMensaje(texto, tipo) {
+			const el = document.getElementById('mensaje');
+			el.textContent = texto;
+			el.className = tipo === 'ok' ? 'mensaje-ok' : 'mensaje-error';
+			el.style.display = 'block';
+			setTimeout(() => {el.style.display = 'none';}, 4000);
+		}
+
+		async function borrarPelicula() {
+			if (!idSeleccionado) return;
+
+			const res = await fetch(`${API}/peliculas/${idSeleccionado}`, {
+				method: 'DELETE'
+			});
+
+			if (res.status === 204) {
+				mostrarMensaje('Película borrada correctamente.', 'ok');
+				todasLasPeliculas = todasLasPeliculas.filter(p => p.id !== idSeleccionado);
+				document.getElementById('input-busqueda-pelicula').value = '';
+				document.getElementById('panel-confirmacion').style.display = 'none';
+				idSeleccionado = null;
+			} else {
+				mostrarMensaje('Error al borrar la película.', 'error');
+			}
+		}
+
+		iniciar();
+		
+		fetch('/peliculas/layout.html') 
+				                .then(response => response.text())
+				                .then(data => {
+				                        document.getElementById('header-container').innerHTML = data;
+				                })
+				                .catch(error => console.error('Error al cargar la cabecera:', error));
+	</script>
+</body>
+
+</html>

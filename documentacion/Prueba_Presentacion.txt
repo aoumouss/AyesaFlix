@@ -1,0 +1,8 @@
+titulo: El diablo viste de Prada 2
+género: drama
+año: 2026
+duración: 119
+sinopsis: Sigue la lucha de Miranda Priestly contra Emily Charlton, su ex asistente convertida en ejecutiva rival, mientras compiten por los ingresos por publicidad en medio de la decadencia de los medios impresos y Miranda se acerca a la jubilación.
+actores: Meryl Streep, Anne Hathaway, Emily Blunt
+url poster: https://image.tmdb.org/t/p/w1280/sz687EF7yJMS4VNEdHKT9ebkhA9.jpg
+url trailer: https://www.youtube.com/embed/IQD3qh7te2o?si=4gbR4x4LWmNow9FG
